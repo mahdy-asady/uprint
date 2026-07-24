@@ -31,6 +31,26 @@ Tokenized logging isn't a new concept, but current C/C++ implementations usually
 - **Clean Codebase:** No macro bloat or custom linker script overrides required.
 - **Drop-in Integration:** Works with any standard C/C++ build system by passing a single `-fplugin` flag to GCC.
 
+## Building & Usage
+
+### Prerequisites
+To build the plugin and run the host decoder, you need `gcc`, `g++`, and `gcc-plugin-dev` (version 12 or newer recommended) and `makefile`
+
+On Ubuntu/Debian, install the host build dependencies with:
+```bash
+sudo apt update
+sudo apt install build-essential gcc-plugin-dev
+```
+### 1. Building the Plugin
+Clone the repository and build the C++ plugin shared library (`libuprint_plugin.so`):
+
+```bash
+git clone https://github.com/mahdy-asady/uprint.git
+cd uprint/plugin
+make
+```
+The compiled plugin will be located at `plugin/bin/uprint.so`.
+
 ## Project Status
 `µprint` is being developed as a Bachelor's Thesis project exploring compiler-assisted optimization techniques for low-level embedded systems.
 
