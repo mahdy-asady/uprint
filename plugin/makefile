@@ -5,7 +5,7 @@ HOST_GCC = g++
 TARGET_GCC = gcc
 
 # The name of the file we want to compile 
-PLUGIN_SOURCE_FILES = src/main.cpp
+PLUGIN_SOURCE_FILES = src/main.cpp src/pass_uprint_lower.cpp
 
 # Plugins directory of GCC
 GCC_PLUGINS_DIR = $(shell $(TARGET_GCC) -print-file-name=plugin)
@@ -20,7 +20,7 @@ all: bin/uprint.so
 
 bin/uprint.so: $(PLUGIN_SOURCE_FILES)
 	mkdir -p bin
-	$(HOST_GCC) -shared $(CXXFLAGS) $^ -o $@
+	$(HOST_GCC) -Iinclude -shared $(CXXFLAGS) $^ -o $@
 
 install: bin/uprint.so
 	sudo cp $(shell pwd)/$^ $(GCC_PLUGINS_DIR)/uprint.so

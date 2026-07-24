@@ -2,7 +2,8 @@
 #include <plugin-version.h>
 #include <iostream>
 
-#include "uprint.hpp"
+#include "config.hpp"
+#include "pass_uprint_lower.hpp"
 
 // GCC GPL Compatibile verification signature
 int plugin_is_GPL_compatible;
@@ -26,6 +27,8 @@ int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version 
     std::cout << PLUGIN_NAME << " plugin v" << PLUGIN_VERSION << " loaded!" << std::endl;
     
     register_plugin_info();
+
+    register_uprint_lower();
 
     return 0;
     (void) plugin_info;
