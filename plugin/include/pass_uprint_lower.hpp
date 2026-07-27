@@ -30,27 +30,27 @@ const pass_data pass_data_uprint_lower =
  * @see Declared in tree-pass.h
  */
 class pass_uprint_lower : public gimple_opt_pass {
-public:
-    /**
-     * Constructor
-     */
-    pass_uprint_lower (gcc::context *ctxt) : gimple_opt_pass (pass_data_uprint_lower, ctxt) {}
+    public:
+        /**
+         * Constructor
+         */
+        pass_uprint_lower (gcc::context *ctxt) : gimple_opt_pass (pass_data_uprint_lower, ctxt) {}
 
-    /**
-     * This and all sub-passes are executed only if the function returns true
-     * @note Defined in opt_pass father class
-     * @see Defined in tree-pass.h
-     */
-    bool gate (function* gate_fun)
-    {
-        return true;
-        (void) gate_fun;
-    }
+        /**
+         * This and all sub-passes are executed only if the function returns true
+         * @note Defined in opt_pass father class
+         * @see Defined in tree-pass.h
+         */
+        bool gate (function* gate_fun)
+        {
+            return true;
+            (void) gate_fun;
+        }
 
-    /**
-     * This is the code to run when pass is executed
-     * @note Defined in opt_pass father class
-     * @see Defined in tree-pass.h
-     */
-    unsigned int execute (function* exec_fun);
+        /**
+         * This is the code to run when pass is executed
+         * @note Defined in opt_pass father class
+         * @see Defined in tree-pass.h
+         */
+        unsigned int execute (function* exec_fun);
 };
