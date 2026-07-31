@@ -42,8 +42,11 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
                 if (callee) {
                     const char *callee_name = IDENTIFIER_POINTER(DECL_NAME(callee));
                     if (callee_name != nullptr && std::strcmp(callee_name, INTERFACE_FN_NAME) == 0) {
-                        std::cout << "Found call to uprint()" << std::endl;
-                        std::cout << "ID: " << db->append("Test") << std::endl;
+                        const char *format_string = extract_format_string(stmt);
+                        if (format_string != nullptr) {
+                            uint32_t id = db->append(format_string);
+                            std::cout << "Found call to uprint(). ID: " << id << std::endl;
+                        }
                     }
                 }
             }
@@ -52,4 +55,14 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
 
     // done!
     return 0;
+}
+
+// Extract first argument of called function in statement. That must be format string
+const char *pass_uprint_lower::extract_format_string(gimple* stmt) {
+    tree arg = gimple_call_arg(stmt, 0);
+    if (arg) {
+        tree format_node = TREE_OPERAND (arg, 0);
+        return TREE_STRING_POINTER(format_node);
+    }
+    return nullptr;
 }

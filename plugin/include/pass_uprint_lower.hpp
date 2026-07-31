@@ -59,4 +59,6 @@ class pass_uprint_lower : public gimple_opt_pass {
 
     private:
         database *db;
+
+        const char *extract_format_string(gimple* stmt);
 };
