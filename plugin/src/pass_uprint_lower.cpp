@@ -8,8 +8,8 @@
 #include <context.h>
 
 // Register callback to PASS MANAGER
-void register_uprint_lower() {
-    static pass_uprint_lower pass_instant = pass_uprint_lower(g);
+void register_uprint_lower(database *db) {
+    static pass_uprint_lower pass_instant(g, db);
 
     // PLUGIN_PASS_MANAGER_SETUP event
     struct register_pass_info pass = {
@@ -43,6 +43,7 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
                     const char *callee_name = IDENTIFIER_POINTER(DECL_NAME(callee));
                     if (callee_name != nullptr && std::strcmp(callee_name, INTERFACE_FN_NAME) == 0) {
                         std::cout << "Found call to uprint()" << std::endl;
+                        std::cout << "ID: " << db->append() << std::endl;
                     }
                 }
             }

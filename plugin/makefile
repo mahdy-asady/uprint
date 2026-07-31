@@ -5,7 +5,9 @@ HOST_GCC = g++
 TARGET_GCC = gcc
 
 # The name of the file we want to compile 
-PLUGIN_SOURCE_FILES = src/main.cpp src/pass_uprint_lower.cpp
+PLUGIN_SOURCE_FILES = src/main.cpp \
+					  src/pass_uprint_lower.cpp \
+					  src/database.cpp
 
 # Plugins directory of GCC
 GCC_PLUGINS_DIR = $(shell $(TARGET_GCC) -print-file-name=plugin)

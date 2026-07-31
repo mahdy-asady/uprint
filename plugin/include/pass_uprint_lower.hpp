@@ -2,8 +2,10 @@
 #include <gcc-plugin.h>
 #include <tree-pass.h>
 #include "config.hpp"
+#include "database.hpp"
 
-void register_uprint_lower();
+
+void register_uprint_lower(database *db);
 
 
 /**
@@ -34,7 +36,8 @@ class pass_uprint_lower : public gimple_opt_pass {
         /**
          * Constructor
          */
-        pass_uprint_lower (gcc::context *ctxt) : gimple_opt_pass (pass_data_uprint_lower, ctxt) {}
+        pass_uprint_lower(gcc::context *ctxt, database *db_ref)
+            : gimple_opt_pass(pass_data_uprint_lower, ctxt), db(db_ref) {}
 
         /**
          * This and all sub-passes are executed only if the function returns true
@@ -53,4 +56,7 @@ class pass_uprint_lower : public gimple_opt_pass {
          * @see Defined in tree-pass.h
          */
         unsigned int execute (function* exec_fun);
+
+    private:
+        database *db;
 };
