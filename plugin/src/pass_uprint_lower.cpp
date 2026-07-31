@@ -41,7 +41,7 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
                 tree callee = gimple_call_fndecl(stmt);
                 if (callee) {
                     const char *callee_name = IDENTIFIER_POINTER(DECL_NAME(callee));
-                    if(strcmp(callee_name, INTERFACE_FN_NAME) == 0) {
+                    if (callee_name != nullptr && std::strcmp(callee_name, INTERFACE_FN_NAME) == 0) {
                         std::cout << "Found call to uprint()" << std::endl;
                     }
                 }
