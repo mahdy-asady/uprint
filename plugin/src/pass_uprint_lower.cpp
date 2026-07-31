@@ -43,7 +43,7 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
                     const char *callee_name = IDENTIFIER_POINTER(DECL_NAME(callee));
                     if (callee_name != nullptr && std::strcmp(callee_name, INTERFACE_FN_NAME) == 0) {
                         std::cout << "Found call to uprint()" << std::endl;
-                        std::cout << "ID: " << db->append() << std::endl;
+                        std::cout << "ID: " << db->append("Test") << std::endl;
                     }
                 }
             }

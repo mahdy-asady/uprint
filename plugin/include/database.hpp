@@ -7,7 +7,7 @@ class database {
         database();
         ~database();
 
-        uint32_t append();
+        uint32_t append(const char *str);
 
     private:
         uint32_t last_record_id = 0;

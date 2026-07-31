@@ -21,12 +21,12 @@ database::~database() {
     }
 }
 
-uint32_t database::append() {
+uint32_t database::append(const char *str) {
     if (!db_stream.is_open()) {
         return ++last_record_id;
     }
 
-    db_stream << "New Record\n";
+    db_stream << str << "\n";
     db_stream.flush();
     return ++last_record_id;
 }
