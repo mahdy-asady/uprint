@@ -7,8 +7,6 @@
 #include <gimple-iterator.h>
 #include <context.h>
 
-using namespace std;
-
 // Register callback to PASS MANAGER
 void register_uprint_lower() {
     static pass_uprint_lower pass_instant = pass_uprint_lower(g);
@@ -31,7 +29,7 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
     const char *fn_name = function_name(exec_fun);
 
     // print the function name
-    cout << endl << "Inspecting function '" << fn_name << "'" << endl;
+    std::cout << std::endl << "Inspecting function '" << fn_name << "'" << std::endl;
 
     basic_block bb;
     // Iterate through all statements (GIMPLE instructions) inside the function
