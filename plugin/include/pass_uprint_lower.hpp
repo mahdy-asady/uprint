@@ -61,4 +61,8 @@ class pass_uprint_lower : public gimple_opt_pass {
         database *db;
 
         const char *extract_format_string(gimple* stmt);
+
+        void replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi);
+
+        tree get_or_create_uprint_emit_fndecl();
 };
