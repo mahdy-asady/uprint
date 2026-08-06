@@ -58,13 +58,13 @@ unsigned int pass_uprint_lower::execute (function* exec_fun) {
 }
 
 // Extract first argument of called function in statement. That must be format string
-const char *pass_uprint_lower::extract_format_string(gimple* stmt) {
+std::string pass_uprint_lower::extract_format_string(gimple* stmt) {
     tree arg = gimple_call_arg(stmt, 0);
     if (arg) {
         tree format_node = TREE_OPERAND (arg, 0);
-        return TREE_STRING_POINTER(format_node);
+        return std::string(TREE_STRING_POINTER(format_node));
     }
-    return nullptr;
+    return "";
 }
 
 void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi) {
@@ -76,8 +76,8 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
         return;
     }
 
-    const char *format_string = extract_format_string(uprint_stmt);
-    if (format_string != nullptr) {
+    std::string format_string = extract_format_string(uprint_stmt);
+    if (!format_string.empty()) {
         record_id = db->append(format_string);
     } else {
         std::cerr << "Error: uprint() call has no format string!" << std::endl;

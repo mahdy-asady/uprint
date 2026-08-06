@@ -21,7 +21,7 @@ database::~database() {
     }
 }
 
-uint32_t database::append(const char *str) {
+uint32_t database::append(const std::string &str) {
     if (!db_stream.is_open()) {
         return ++last_record_id;
     }

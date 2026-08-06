@@ -1,8 +1,11 @@
 #pragma once
+
 #include <gcc-plugin.h>
 #include <tree-pass.h>
 #include "config.hpp"
 #include "database.hpp"
+
+#include <string>
 
 
 void register_uprint_lower(database *db);
@@ -60,7 +63,7 @@ class pass_uprint_lower : public gimple_opt_pass {
     private:
         database *db;
 
-        const char *extract_format_string(gimple* stmt);
+        std::string extract_format_string(gimple* stmt);
 
         void replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi);
 
