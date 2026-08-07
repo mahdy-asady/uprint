@@ -77,9 +77,7 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     }
 
     std::string format_string = extract_format_string(uprint_stmt);
-    if (!format_string.empty()) {
-        record_id = db->append(format_string);
-    } else {
+    if (format_string.empty()) {
         std::cerr << "Error: uprint() call has no format string!" << std::endl;
     }
 
@@ -101,10 +99,20 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     tree field_list = record_field;
     tree last_field = record_field;
 
+    std::vector<uint8_t> arg_sizes;
+
     // Append remaining argument fields (f1, f2, ...)
     for (unsigned i = 1; i < num_args; ++i) {
         tree arg = gimple_call_arg(uprint_stmt, i);
         tree arg_type = TREE_TYPE(arg);
+
+        tree size_tree = TYPE_SIZE_UNIT(TREE_TYPE(arg));
+
+        uint8_t size_bytes = 0;
+        if (size_tree && tree_fits_uhwi_p(size_tree)) {
+            size_bytes = static_cast<uint8_t>(tree_to_uhwi(size_tree));
+        }
+        arg_sizes.push_back(size_bytes);
 
         // Create field declaration: type field_i;
         tree field = build_decl(UNKNOWN_LOCATION, FIELD_DECL, 
@@ -114,6 +122,8 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
         DECL_CHAIN(last_field) = field;
         last_field = field;
     }
+
+    record_id = db->append(format_string, arg_sizes);
 
     TYPE_FIELDS(struct_type) = field_list;
     layout_type(struct_type); // Finalize field offsets and struct size
