@@ -11,7 +11,59 @@ EXPECTED_DB_NAME = "expected.db"
 EXPECTED_OUTPUT_NAME = "expected.output"
 
 
+def verify_binary_stream(expected_file: Path, actual_bytes: bytes) -> bool:
+    #  Verifies actual_bytes against expected_file line-by-line.
+    byte_offset = 0
 
+    with open(expected_file, "r", encoding="utf-8") as f:
+        for line_num, line in enumerate(f, start=1):
+            # 1. Strip comments and whitespace
+            clean_line = line.split("#", 1)[0].strip()
+            if not clean_line:
+                continue
+
+            # 2. Normalize hex string
+            expected_hex = clean_line.replace(" ", "").upper()
+
+            # Validate hex length safety
+            if len(expected_hex) % 2 != 0:
+                print(f"❌ Syntax Error in {expected_file.name}:{line_num}")
+                print(f"   Hex string has odd length: '{clean_line}'")
+                return False
+
+            chunk_len = len(expected_hex) // 2
+
+            # 3. Slice actual binary stream at current offset
+            actual_chunk = actual_bytes[byte_offset : byte_offset + chunk_len]
+
+            # Reformat actual chunk to match spaced uppercase format
+            actual_hex = actual_chunk.hex().upper()
+
+            # 4. Assert chunk match
+            if actual_hex != expected_hex:
+                # Format expected string with byte spaces for clean comparison display
+                expected_formatted = " ".join(expected_hex[i:i+2] for i in range(0, len(expected_hex), 2))
+                actual_formatted = " ".join(actual_hex[i:i+2] for i in range(0, len(actual_hex), 2)) if actual_hex else "<EOF>"
+
+                print(f"❌ Mismatch in {expected_file.name} at line {line_num} (Byte offset {byte_offset}):")
+                print(f"   Expected: {expected_formatted}")
+                print(f"   Actual:   {actual_formatted}")
+                return False
+
+            byte_offset += chunk_len
+
+    # 5. Verify no trailing unconsumed bytes remain
+    if byte_offset < len(actual_bytes):
+        extra_bytes = actual_bytes[byte_offset:].hex(' ').upper()
+        print(f"❌ Stream length mismatch in {expected_file.name}:")
+        print(f"   Expected stream to end at byte {byte_offset}, but {len(actual_bytes) - byte_offset} extra bytes were emitted:")
+        print(f"   Extra payload: {extra_bytes}")
+        return False
+
+    return True
+
+
+# Run a single test
 def run_test(test_dir: Path) -> bool:
     print(f"\n>>> Running Test: {test_dir.name} <<<")
     
@@ -48,13 +100,7 @@ def run_test(test_dir: Path) -> bool:
         print(f"❌ Missing expected output file: {expected_output}")
         return False
 
-    expected_output_content = expected_output.read_bytes()
-
-    # Check if execution output is same as expected output
-    if exec_res.stdout != expected_output_content:
-        print(f"❌ Output Mismatch:")
-        print(f"❌ Output:         {exec_res.stdout.hex(' ').upper()}")
-        print(f"❌ Expected Output:{expected_output_content.hex(' ').upper()}")
+    if not verify_binary_stream(expected_output, exec_res.stdout):
         return False
 
     print(f"✅ {test_dir.name} Passed!")

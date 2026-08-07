@@ -12,12 +12,6 @@ $(TARGET): main.c
 	@rm -f uprint.db
 	$(CC) $(CFLAGS) $< -o $@
 
-test: $(TARGET)
-	@echo "--- Running 01_basic_single_file ---"
-	./$(TARGET)
-	@echo "--- Generated Database Content ---"
-	@cat uprint.db
-
 clean:
 	rm -rf bin
 	rm -f uprint.db *.o
