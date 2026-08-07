@@ -10,8 +10,8 @@ Traditional printf calls on microcontrollers come with high costs:
 - Transmitting long text strings bogs down UART/SWO interfaces.
 
 `µprint` shifts the heavy lifting from the target MCU to the development host:
-1. **Compile Time**: A custom GCC plugin intercepts logging calls, extracts format strings into an ELF section, and replaces the call with a compact 32-bit hash ID.
-2. **Runtime**: The MCU transmits only the hash ID and raw binary arguments over the serial wire.
+1. **Compile Time**: A custom GCC plugin intercepts logging calls, extracts format strings into an ELF section, and replaces the call with a compact ID.
+2. **Runtime**: The MCU transmits only the ID and raw binary arguments over the serial wire.
 3. **Host Side**: A host tool parses the target's ELF file, maps incoming IDs back to their format strings, and prints the formatted log.
 
 This transformation happens directly during compilation by adding a single flag to GCC.
@@ -39,7 +39,7 @@ To build the plugin and run the host decoder, you need `gcc`, `g++`, and `gcc-pl
 On Ubuntu/Debian, install the host build dependencies with:
 ```bash
 sudo apt update
-sudo apt install build-essential gcc-plugin-dev
+sudo apt install build-essential gcc-12-plugin-dev
 ```
 ### 1. Building the Plugin
 Clone the repository and build the C++ plugin shared library (`libuprint_plugin.so`):
