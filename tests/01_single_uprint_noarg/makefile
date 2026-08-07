@@ -1,0 +1,23 @@
+PLUGIN_PATH ?= ../../plugin/bin/uprint.so
+INC_DIR     ?= ../../include
+
+CC       := gcc
+CFLAGS   := -O2 -I$(INC_DIR) -fplugin=$(PLUGIN_PATH)
+TARGET   := bin/test_app
+
+all: $(TARGET)
+
+$(TARGET): main.c
+	mkdir -p bin
+	@rm -f uprint.db
+	$(CC) $(CFLAGS) $< -o $@
+
+test: $(TARGET)
+	@echo "--- Running 01_basic_single_file ---"
+	./$(TARGET)
+	@echo "--- Generated Database Content ---"
+	@cat uprint.db
+
+clean:
+	rm -rf bin
+	rm -f uprint.db *.o

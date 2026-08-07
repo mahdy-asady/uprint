@@ -16,7 +16,7 @@ GCC_PLUGINS_DIR = $(shell $(TARGET_GCC) -print-file-name=plugin)
 CXXFLAGS+= -I$(GCC_PLUGINS_DIR)/include -fPIC -fno-rtti -std=gnu++20 -Wall -Wextra -Wpedantic
 
 # our recipes
-.PHONY: all clean test
+.PHONY: all clean
 
 all: bin/uprint.so
 
@@ -26,9 +26,6 @@ bin/uprint.so: $(PLUGIN_SOURCE_FILES)
 
 install: bin/uprint.so
 	sudo cp $(shell pwd)/$^ $(GCC_PLUGINS_DIR)/uprint.so
-
-test:
-	gcc test.c -fplugin=bin/uprint.so -o bin/test
 
 clean: 
 	rm -f bin/*
