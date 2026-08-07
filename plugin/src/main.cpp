@@ -1,13 +1,14 @@
 #include <gcc-plugin.h>
 #include <plugin-version.h>
 #include <iostream>
+#include <memory>
 
 #include "config.hpp"
 #include "pass_uprint_lower.hpp"
 #include "database.hpp"
 
 // Global instance of database
-database *db;
+static std::unique_ptr<database> db;
 
 // GCC GPL Compatibile verification signature
 int plugin_is_GPL_compatible;
@@ -25,7 +26,7 @@ void register_plugin_info() {
 
 // Cleanup plugin resources when GCC finishes processing the compilation unit.
 void plugin_deinit(void *gcc_data, void *user_data) {
-    delete db;
+    db.reset();
     (void) gcc_data;
     (void) user_data;
 }
@@ -38,14 +39,14 @@ int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version 
         return 1;
     std::cout << PLUGIN_NAME << " plugin v" << PLUGIN_VERSION << " loaded!" << std::endl;
 
-    db = new database();
+    db = std::make_unique<database>();
 
     // Register plugin deinit event
     register_callback(PLUGIN_NAME, PLUGIN_FINISH, plugin_deinit,NULL);
 
     register_plugin_info();
 
-    register_uprint_lower(db);
+    register_uprint_lower(db.get());
 
     return 0;
     (void) plugin_info;

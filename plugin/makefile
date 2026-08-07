@@ -13,12 +13,24 @@ PLUGIN_SOURCE_FILES = src/main.cpp \
 GCC_PLUGINS_DIR = $(shell $(TARGET_GCC) -print-file-name=plugin)
 
 # GCC CPP flags (we need position independent-code and run-time type info support disabled)
-CXXFLAGS+= -I$(GCC_PLUGINS_DIR)/include -fPIC -fno-rtti -std=gnu++20 -Wall -Wextra -Wpedantic
+CXXFLAGS+= -isystem$(GCC_PLUGINS_DIR)/include -fPIC -fno-rtti -std=gnu++20 -Wall -Wextra -fanalyzer -Wpedantic
 
 # our recipes
 .PHONY: all clean
 
-all: bin/uprint.so
+all: cppcheck
+
+cppcheck: bin/uprint.so
+	@echo
+	@echo Start Static Analysis...
+	@cppcheck -q --enable=all --std=c++17 --language=c++ \
+			  -Iinclude -isystem$(GCC_PLUGINS_DIR)/include \
+			  --suppress=missingIncludeSystem \
+			  --suppress=unusedFunction:src/main.cpp \
+			  --suppress=unusedFunction:src/pass_uprint_lower.cpp \
+			  --error-exitcode=1 src
+	@echo Static Analysis Done!
+	@echo
 
 bin/uprint.so: $(PLUGIN_SOURCE_FILES)
 	mkdir -p bin

@@ -155,14 +155,11 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
         current_field = DECL_CHAIN(current_field);
     }
 
-    tree payload_ptr_expr = null_pointer_node;
-    tree payload_size_expr = build_int_cst(uint16_type_node, 0);
-
     // Address of payload: (const void*)&payload_var
-    payload_ptr_expr = build1(ADDR_EXPR, const_ptr_type_node, payload_var);
+    tree payload_ptr_expr = build1(ADDR_EXPR, const_ptr_type_node, payload_var);
     
     // Size of payload: sizeof(struct_type)
-    payload_size_expr = fold_convert(uint16_type_node, TYPE_SIZE_UNIT(struct_type));
+    tree payload_size_expr = fold_convert(uint16_type_node, TYPE_SIZE_UNIT(struct_type));
 
 
     // ------------------------------------------------------------------------
