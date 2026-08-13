@@ -89,15 +89,15 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     tree struct_type = make_node(RECORD_TYPE);
     TYPE_NAME(struct_type) = create_tmp_var_name("uprint_payload_t");
     TYPE_PACKED(struct_type) = 1; // __attribute__((packed))
+    SET_TYPE_ALIGN(struct_type, 8); // Force overall struct alignment to 8 bits (1 byte)
 
     // Field 0: uint32_t record_id
-    tree record_field = build_decl(UNKNOWN_LOCATION, FIELD_DECL, 
+    tree first_field = build_decl(UNKNOWN_LOCATION, FIELD_DECL, 
                                 get_identifier("record_id"), 
                                 uint32_type_node);
-    DECL_CONTEXT(record_field) = struct_type;
-
-    tree field_list = record_field;
-    tree last_field = record_field;
+    DECL_CONTEXT(first_field) = struct_type;
+    DECL_PACKED(first_field) = 1;
+    tree last_field = first_field;
 
     std::vector<uint8_t> arg_sizes;
 
@@ -119,13 +119,14 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
                                 get_identifier(("f" + std::to_string(i)).c_str()), 
                                 arg_type);
         DECL_CONTEXT(field) = struct_type;
+        DECL_PACKED(field) = 1;
         DECL_CHAIN(last_field) = field;
         last_field = field;
     }
 
     record_id = db->append(format_string, arg_sizes);
 
-    TYPE_FIELDS(struct_type) = field_list;
+    TYPE_FIELDS(struct_type) = first_field;
     layout_type(struct_type); // Finalize field offsets and struct size
 
     // Declare a local temporary variable of this struct type
@@ -136,7 +137,7 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     // --------------------------------------------------------------------
 
     // 5. Assign record_id to field 0: packet.record_id = 0x7C9A4B12
-    tree record_ref = build3(COMPONENT_REF, uint32_type_node, payload_var, record_field, NULL_TREE);
+    tree record_ref = build3(COMPONENT_REF, uint32_type_node, payload_var, first_field, NULL_TREE);
     gassign *assign_record = gimple_build_assign(record_ref, build_int_cstu(uint32_type_node, record_id));
     gsi_insert_before(gsi, assign_record, GSI_SAME_STMT);
 
