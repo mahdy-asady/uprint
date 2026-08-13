@@ -17,6 +17,10 @@ database::database() {
         std::cerr << "Error opening database file " << DB_FILE_NAME << "." << std::endl;
         std::exit(1);
     }
+
+    // TODO: Store database & communication configurations in first line
+    db_stream << "\n";
+    db_stream.flush();
 }
 
 database::~database() {
