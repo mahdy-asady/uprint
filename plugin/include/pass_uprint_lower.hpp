@@ -6,7 +6,7 @@
 #include "database.hpp"
 
 #include <string>
-
+#include <vector>
 
 void register_uprint_lower(database *db);
 
@@ -66,6 +66,15 @@ class pass_uprint_lower : public gimple_opt_pass {
         std::string extract_format_string(gimple* stmt);
 
         void replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi);
+
+        tree create_payload_struct(const std::vector<tree>& args,
+                       std::vector<uint8_t> &arg_sizes);
+
+        void fill_payload_struct(tree struct_type,
+                     tree payload_var,
+                     const std::vector<tree>& args,
+                     uint32_t record_id,
+                     gimple_stmt_iterator *gsi);
 
         tree get_or_create_uprint_emit_fndecl();
 

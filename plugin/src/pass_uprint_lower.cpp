@@ -27,6 +27,92 @@ void register_uprint_lower(database *db) {
     register_callback(PLUGIN_NAME, PLUGIN_PASS_MANAGER_SETUP, NULL, &pass);
 }
 
+/*
+ * Build a packed payload RECORD_TYPE for the given argument list.
+ * The returned struct has a leading `uint32_t record_id` field followed by
+ * one FIELD_DECL per provided argument. `arg_sizes` is populated with the
+ * byte-size of each argument field (for registration in the database).
+ * The function finalizes layout by calling `layout_type` and returns the
+ * constructed RECORD_TYPE node.
+ */
+tree pass_uprint_lower::create_payload_struct(const std::vector<tree>& args,
+                                             std::vector<uint8_t> &arg_sizes) {
+    // Create anonymous RECORD_TYPE (struct)
+    tree struct_type = make_node(RECORD_TYPE);
+    TYPE_NAME(struct_type) = create_tmp_var_name("uprint_payload_t");
+    TYPE_PACKED(struct_type) = 1; // __attribute__((packed))
+    SET_TYPE_ALIGN(struct_type, 8); // Force overall struct alignment to 8 bits (1 byte)
+
+    // Field 0: uint32_t record_id
+    tree first_field = build_decl(UNKNOWN_LOCATION, FIELD_DECL,
+                                get_identifier("record_id"),
+                                uint32_type_node);
+    DECL_CONTEXT(first_field) = struct_type;
+    DECL_PACKED(first_field) = 1;
+    tree last_field = first_field;
+
+    arg_sizes.clear();
+
+    // Append remaining argument fields (f1, f2, ...)
+    for (size_t i = 0; i < args.size(); ++i) {
+        tree arg = args[i];
+        tree arg_type = TREE_TYPE(arg);
+        tree size_unit = TYPE_SIZE_UNIT(arg_type);
+        uint8_t size_bytes = (size_unit && tree_fits_uhwi_p(size_unit))
+                            ? static_cast<uint8_t>(tree_to_uhwi(size_unit)) : 0;
+
+        arg_sizes.push_back(size_bytes);
+
+        // Create field declaration: type field_i;
+        tree field = build_decl(UNKNOWN_LOCATION, FIELD_DECL,
+                                get_identifier(("f" + std::to_string(i)).c_str()),
+                                arg_type);
+        DECL_CONTEXT(field) = struct_type;
+        DECL_PACKED(field) = 1;
+        DECL_CHAIN(last_field) = field;
+        last_field = field;
+    }
+
+    TYPE_FIELDS(struct_type) = first_field;
+    layout_type(struct_type); // Finalize field offsets and struct size
+
+    return struct_type;
+}
+
+/*
+ * Emit GIMPLE assignments to populate the given `payload_var` instance:
+ * - write `record_id` into the first field (record_id)
+ * - assign each subsequent `args[i]` into the corresponding struct field
+ * All assignments are inserted before the provided `gsi` iterator.
+ */
+void pass_uprint_lower::fill_payload_struct(tree struct_type,
+                                            tree payload_var,
+                                            const std::vector<tree>& args,
+                                            uint32_t record_id,
+                                            gimple_stmt_iterator *gsi) {
+    // 1. Assign record_id to field 0: packet.record_id = 0x7C9A4B12
+    tree first_field = TYPE_FIELDS(struct_type);
+    tree record_ref = build3(COMPONENT_REF, uint32_type_node, payload_var, first_field, NULL_TREE);
+    gassign *assign_record = gimple_build_assign(record_ref, build_int_cstu(uint32_type_node, record_id));
+    gsi_insert_before(gsi, assign_record, GSI_SAME_STMT);
+
+    tree current_field = DECL_CHAIN(first_field);
+    for (size_t i = 0; i < args.size(); ++i) {
+        tree arg = args[i];
+        tree field_type = TREE_TYPE(current_field);
+
+        // Build: payload_var.field_i
+        tree field_ref = build3(COMPONENT_REF, field_type,
+                                payload_var, current_field, NULL_TREE);
+
+        // Build GIMPLE assignment: payload_var.field_i = arg_i;
+        gassign *assign_stmt = gimple_build_assign(field_ref, arg);
+        gsi_insert_before(gsi, assign_stmt, GSI_SAME_STMT);
+
+        current_field = DECL_CHAIN(current_field);
+    }
+}
+
 
 unsigned int pass_uprint_lower::execute (function* exec_fun) {
     // Get the name of function whose body we are reading
@@ -67,8 +153,15 @@ std::string pass_uprint_lower::extract_format_string(gimple* stmt) {
     return "";
 }
 
+/*
+ * Lower a `uprint(...)` GIMPLE call into a packed payload and an emit call.
+ * Steps performed:
+ * - build a packed struct type containing `record_id` and each argument field
+ * - create a local payload instance and populate it with `record_id` and args
+ * - replace the original call with a call to `__uprint_emit(payload_ptr, size)`
+ * All new GIMPLE assignments are inserted immediately before the original call.
+ */
 void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi) {
-    uint32_t record_id;
     unsigned num_args = gimple_call_num_args(uprint_stmt);
 
     if (num_args < 1) {
@@ -81,80 +174,19 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
         std::cerr << "Error: uprint() call has no format string!" << std::endl;
     }
 
-    // ------------------------------------------------------------------------
-    // Build Packed Struct Type if variadic arguments exist
-    // ------------------------------------------------------------------------
-
-    // Create anonymous RECORD_TYPE (struct)
-    tree struct_type = make_node(RECORD_TYPE);
-    TYPE_NAME(struct_type) = create_tmp_var_name("uprint_payload_t");
-    TYPE_PACKED(struct_type) = 1; // __attribute__((packed))
-    SET_TYPE_ALIGN(struct_type, 8); // Force overall struct alignment to 8 bits (1 byte)
-
-    // Field 0: uint32_t record_id
-    tree first_field = build_decl(UNKNOWN_LOCATION, FIELD_DECL, 
-                                get_identifier("record_id"), 
-                                uint32_type_node);
-    DECL_CONTEXT(first_field) = struct_type;
-    DECL_PACKED(first_field) = 1;
-    tree last_field = first_field;
-
     std::vector<tree> args = get_uprint_real_args(uprint_stmt);
     std::vector<uint8_t> arg_sizes;
 
-    // Append remaining argument fields (f1, f2, ...)
-    for (size_t i = 0; i < args.size(); ++i) {
-        tree arg = args[i];
-        tree arg_type = TREE_TYPE(arg);
-        tree size_unit = TYPE_SIZE_UNIT(arg_type);
-        uint8_t size_bytes = (size_unit && tree_fits_uhwi_p(size_unit)) 
-                            ? static_cast<uint8_t>(tree_to_uhwi(size_unit)) : 0;
-
-        arg_sizes.push_back(size_bytes);
-
-        // Create field declaration: type field_i;
-        tree field = build_decl(UNKNOWN_LOCATION, FIELD_DECL, 
-                                get_identifier(("f" + std::to_string(i)).c_str()), 
-                                arg_type);
-        DECL_CONTEXT(field) = struct_type;
-        DECL_PACKED(field) = 1;
-        DECL_CHAIN(last_field) = field;
-        last_field = field;
-    }
-
-    record_id = db->append(format_string, arg_sizes);
-
-    TYPE_FIELDS(struct_type) = first_field;
-    layout_type(struct_type); // Finalize field offsets and struct size
+    // Build struct type
+    tree struct_type = create_payload_struct(args, arg_sizes);
 
     // Declare a local temporary variable of this struct type
     tree payload_var = create_tmp_var(struct_type, "uprint_data");
 
-    // --------------------------------------------------------------------
-    // Assign arguments into struct fields before the call
-    // --------------------------------------------------------------------
+    uint32_t record_id = db->append(format_string, arg_sizes);
 
-    // 5. Assign record_id to field 0: packet.record_id = 0x7C9A4B12
-    tree record_ref = build3(COMPONENT_REF, uint32_type_node, payload_var, first_field, NULL_TREE);
-    gassign *assign_record = gimple_build_assign(record_ref, build_int_cstu(uint32_type_node, record_id));
-    gsi_insert_before(gsi, assign_record, GSI_SAME_STMT);
-
-    tree current_field = DECL_CHAIN(first_field);
-    
-    for (size_t i = 0; i < args.size(); ++i) {
-        tree arg = args[i];
-        tree field_type = TREE_TYPE(current_field);
-
-        // Build: payload_var.field_i
-        tree field_ref = build3(COMPONENT_REF, field_type, 
-                                payload_var, current_field, NULL_TREE);
-
-        // Build GIMPLE assignment: payload_var.field_i = arg_i;
-        gassign *assign_stmt = gimple_build_assign(field_ref, arg);
-        gsi_insert_before(gsi, assign_stmt, GSI_SAME_STMT);
-
-        current_field = DECL_CHAIN(current_field);
-    }
+    // Populate payload fields and record id
+    fill_payload_struct(struct_type, payload_var, args, record_id, gsi);
 
     // Address of payload: (const void*)&payload_var
     tree payload_ptr_expr = build1(ADDR_EXPR, const_ptr_type_node, payload_var);
