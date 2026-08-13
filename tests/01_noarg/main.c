@@ -9,9 +9,25 @@ void __uprint_emit(const void *data, uint16_t length) {
     }
 }
 
+void test_empty_format_string() {
+    uprint("");
+}
+
+void test_literal() {
+    uprint("literal-only");
+}
+
+void test_escape_comma() {
+    uprint("Escaped, comma");
+}
 
 int main()
 {
-    uprint("Single file, no arguments");
+    test_empty_format_string();
+
+    test_literal();
+
+    test_escape_comma();
+
     return 0;
 }
