@@ -123,7 +123,9 @@ def verify_binary_stream(expected_file: Path, actual_bytes: bytes) -> tuple[bool
         log(f"   Extra payload: {extra_bytes}")
         print(f"{ERROR} FAILED{RESET}")
         failed = True
-    print(f"{SUCCESS} PASSED{RESET}")
+
+    if not failed:
+        print(f"{SUCCESS} PASSED{RESET}")
 
     return not failed, buffer.getvalue()
 
@@ -211,7 +213,6 @@ def run_test(test_dir: Path) -> tuple[bool, str]:
 
     verify_ret, verify_log = verify_binary_stream(expected_output, exec_res.stdout)
     if not verify_ret:
-        print(f"{ERROR} FAILED{RESET}")
         log(f"❌ Expected output mismatch:\n{verify_log}")
         return False, buffer.getvalue()
 
