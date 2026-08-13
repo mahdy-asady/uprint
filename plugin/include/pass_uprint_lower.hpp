@@ -68,4 +68,6 @@ class pass_uprint_lower : public gimple_opt_pass {
         void replace_uprint_call(gimple *uprint_stmt, gimple_stmt_iterator *gsi);
 
         tree get_or_create_uprint_emit_fndecl();
+
+        std::vector<tree> get_uprint_real_args(gimple *uprint_stmt);
 };

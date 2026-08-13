@@ -99,19 +99,17 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     DECL_PACKED(first_field) = 1;
     tree last_field = first_field;
 
+    std::vector<tree> args = get_uprint_real_args(uprint_stmt);
     std::vector<uint8_t> arg_sizes;
 
     // Append remaining argument fields (f1, f2, ...)
-    for (unsigned i = 1; i < num_args; ++i) {
-        tree arg = gimple_call_arg(uprint_stmt, i);
+    for (size_t i = 0; i < args.size(); ++i) {
+        tree arg = args[i];
         tree arg_type = TREE_TYPE(arg);
+        tree size_unit = TYPE_SIZE_UNIT(arg_type);
+        uint8_t size_bytes = (size_unit && tree_fits_uhwi_p(size_unit)) 
+                            ? static_cast<uint8_t>(tree_to_uhwi(size_unit)) : 0;
 
-        tree size_tree = TYPE_SIZE_UNIT(TREE_TYPE(arg));
-
-        uint8_t size_bytes = 0;
-        if (size_tree && tree_fits_uhwi_p(size_tree)) {
-            size_bytes = static_cast<uint8_t>(tree_to_uhwi(size_tree));
-        }
         arg_sizes.push_back(size_bytes);
 
         // Create field declaration: type field_i;
@@ -141,14 +139,16 @@ void pass_uprint_lower::replace_uprint_call(gimple *uprint_stmt, gimple_stmt_ite
     gassign *assign_record = gimple_build_assign(record_ref, build_int_cstu(uint32_type_node, record_id));
     gsi_insert_before(gsi, assign_record, GSI_SAME_STMT);
 
-    tree current_field = DECL_CHAIN(record_field);
-    for (unsigned i = 1; i < num_args; ++i) {
-        tree arg = gimple_call_arg(uprint_stmt, i);
-        
+    tree current_field = DECL_CHAIN(first_field);
+    
+    for (size_t i = 0; i < args.size(); ++i) {
+        tree arg = args[i];
+        tree field_type = TREE_TYPE(current_field);
+
         // Build: payload_var.field_i
-        tree field_ref = build3(COMPONENT_REF, TREE_TYPE(current_field), 
+        tree field_ref = build3(COMPONENT_REF, field_type, 
                                 payload_var, current_field, NULL_TREE);
-        
+
         // Build GIMPLE assignment: payload_var.field_i = arg_i;
         gassign *assign_stmt = gimple_build_assign(field_ref, arg);
         gsi_insert_before(gsi, assign_stmt, GSI_SAME_STMT);
@@ -209,4 +209,28 @@ tree pass_uprint_lower::get_or_create_uprint_emit_fndecl() {
     DECL_PRESERVE_P(emit_fndecl) = 1;
 
     return emit_fndecl;
+}
+
+std::vector<tree> pass_uprint_lower::get_uprint_real_args(gimple *uprint_stmt) {
+    unsigned num_args = gimple_call_num_args(uprint_stmt);
+    std::vector<tree> real_args;
+    real_args.reserve(num_args - 1);
+
+    for (unsigned i = 1; i < num_args; ++i) {
+        tree arg = gimple_call_arg(uprint_stmt, i);
+        // Trace back SSA_NAME to unwrap variadic promotion casts (NOP_EXPR / CONVERT_EXPR)
+        if (TREE_CODE(arg) == SSA_NAME) {
+            gimple *def_stmt = SSA_NAME_DEF_STMT(arg);
+            if (def_stmt && is_gimple_assign(def_stmt)) {
+                enum tree_code rhs_code = gimple_assign_rhs_code(def_stmt);
+                if (rhs_code == NOP_EXPR || rhs_code == CONVERT_EXPR) {
+                    tree orig_op = gimple_assign_rhs1(def_stmt);
+                    arg = orig_op;
+                }
+            }
+        }
+        real_args.push_back(arg);
+    }
+
+    return real_args;
 }
