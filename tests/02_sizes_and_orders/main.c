@@ -45,7 +45,7 @@ void test_int8_max() {
 *******************************************************************************************/
 
 void test_short_min() {
-    short num = 0x8000;
+    short num = -32768;
     uprint("test_short_min: %d", num);
 }
 
@@ -137,32 +137,32 @@ void test_double_neg() {
 
 void test_int64_min() {
     int64_t num = 0x8000000000000000;
-    uprint("test_int64_min: %d", num);
+    uprint("test_int64_min: %ld", num);
 }
 
 void test_int64_max() {
     int64_t num = 0x7FFFFFFFFFFFFFFF;
-    uprint("test_int64_max: %d", num);
+    uprint("test_int64_max: %ld", num);
 }
 
 void test_int64_1to0to1() {
     int64_t num = 0xAB54A98EEE391EEA;
-    uprint("test_int64_1to0to1: %d", num);
+    uprint("test_int64_1to0to1: %ld", num);
 }
 
 void test_uint64_min() {
     uint64_t num = 0;
-    uprint("test_uint64_min: %d", num);
+    uprint("test_uint64_min: %ld", num);
 }
 
 void test_uint64_max() {
     uint64_t num = 0xFFFFFFFFFFFFFFFF;
-    uprint("test_uint64_max: %d", num);
+    uprint("test_uint64_max: %ld", num);
 }
 
 void test_uint64_1to0to1() {
     uint64_t num = 0xAB54A98EEE391EEA;
-    uprint("test_uint64_1to0to1: %d", num);
+    uprint("test_uint64_1to0to1: %ld", num);
 }
 
 // C Promotion test
