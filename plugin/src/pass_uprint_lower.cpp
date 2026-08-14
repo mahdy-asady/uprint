@@ -11,6 +11,8 @@
 
 #include <context.h>
 
+#include "config.hpp"
+
 // Register callback to PASS MANAGER
 void register_uprint_lower(database *db) {
     static pass_uprint_lower pass_instant(g, db);
@@ -62,6 +64,9 @@ tree pass_uprint_lower::create_payload_struct(const std::vector<tree>& args,
                             ? static_cast<uint8_t>(tree_to_uhwi(size_unit)) : 0;
 
         arg_sizes.push_back(size_bytes);
+
+        DEBUG("Arg %zu: type=%s, precision=%u bits, unsigned=%d, size=%u bytes", 
+                i + 1, get_tree_code_name(TREE_CODE(arg_type)), TYPE_PRECISION(arg_type), TYPE_UNSIGNED(arg_type), size_bytes);
 
         // Create field declaration: type field_i;
         tree field = build_decl(UNKNOWN_LOCATION, FIELD_DECL,
@@ -115,11 +120,8 @@ void pass_uprint_lower::fill_payload_struct(tree struct_type,
 
 
 unsigned int pass_uprint_lower::execute (function* exec_fun) {
-    // Get the name of function whose body we are reading
-    const char *fn_name = function_name(exec_fun);
-
     // print the function name
-    std::cout << std::endl << "Inspecting function '" << fn_name << "'" << std::endl;
+    DEBUG("Inspecting function '%s'", function_name(exec_fun));
 
     basic_block bb;
     // Iterate through all statements (GIMPLE instructions) inside the function

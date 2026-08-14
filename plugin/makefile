@@ -1,3 +1,5 @@
+DEBUG ?= 0
+
 # The gcc used to compile our plugin (consider that is written in C++!)
 HOST_GCC = g++
 
@@ -14,6 +16,13 @@ GCC_PLUGINS_DIR = $(shell $(TARGET_GCC) -print-file-name=plugin)
 
 # GCC CPP flags (we need position independent-code and run-time type info support disabled)
 CXXFLAGS+= -isystem$(GCC_PLUGINS_DIR)/include -fPIC -fno-rtti -std=gnu++20 -Wall -Wextra -fanalyzer -Wpedantic
+
+# Check if DEBUG flag is set
+ifeq ($(DEBUG), 1)
+    CXXFLAGS += -DENABLE_DEBUG -g -O0
+else
+    CXXFLAGS += -O2
+endif
 
 # our recipes
 .PHONY: all clean

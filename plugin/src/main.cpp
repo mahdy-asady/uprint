@@ -37,7 +37,7 @@ int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version 
     // Check the GCC version used to compile the plugin against the current GCC version. If they don't equal, the plugin aborts initialization
     if (!plugin_default_version_check (version, &gcc_version))
         return 1;
-    std::cout << PLUGIN_NAME << " plugin v" << PLUGIN_VERSION << " loaded!" << std::endl;
+    DEBUG("%s plugin v%s loaded!", PLUGIN_NAME, PLUGIN_VERSION);
 
     db = std::make_unique<database>();
 
