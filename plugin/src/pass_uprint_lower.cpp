@@ -245,6 +245,9 @@ tree pass_uprint_lower::get_or_create_uprint_emit_fndecl() {
     return emit_fndecl;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wanalyzer-use-of-uninitialized-value"
+
 std::vector<tree> pass_uprint_lower::get_uprint_real_args(gimple *uprint_stmt) {
     unsigned num_args = gimple_call_num_args(uprint_stmt);
     std::vector<tree> real_args;
@@ -268,3 +271,4 @@ std::vector<tree> pass_uprint_lower::get_uprint_real_args(gimple *uprint_stmt) {
 
     return real_args;
 }
+#pragma GCC diagnostic pop
