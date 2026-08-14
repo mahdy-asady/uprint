@@ -14,11 +14,11 @@
 class database {
     public:
         database();
-        ~database();
 
         uint32_t append(const std::string &fmt_str, const std::vector<uint8_t> &arg_sizes = {});
 
     private:
-        uint32_t last_record_id = 0;
-        std::ofstream db_stream;
+        uint32_t get_new_id(FILE *db_file);
+
+        void write_escaped_fmt_str(FILE *db_file, const std::string &str);
 };

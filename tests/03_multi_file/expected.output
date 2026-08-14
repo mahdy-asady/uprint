@@ -1,0 +1,5 @@
+# test_literal
+01 00 00 00
+
+# test_int8_max
+02 00 00 00  7F
