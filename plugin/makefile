@@ -42,7 +42,7 @@ cppcheck: bin/uprint.so
 	@echo
 
 bin/uprint.so: $(PLUGIN_SOURCE_FILES)
-	mkdir -p bin
+	@mkdir -p bin
 	$(HOST_GCC) -Iinclude -shared $(CXXFLAGS) $^ -o $@
 
 install: bin/uprint.so

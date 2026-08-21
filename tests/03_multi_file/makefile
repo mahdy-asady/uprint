@@ -8,9 +8,9 @@ TARGET   := bin/test_app
 all: $(TARGET)
 
 $(TARGET): main.c emitter.c
-	mkdir -p bin
+	@mkdir -p bin
 	@rm -f uprint.db
-	$(CC) $(CFLAGS) main.c emitter.c third.c -o $(TARGET)
+	@$(CC) $(CFLAGS) main.c emitter.c third.c -o $(TARGET)
 
 clean:
 	rm -rf bin
