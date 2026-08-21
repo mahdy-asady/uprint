@@ -19,10 +19,10 @@ test_float_neg: %f,4
 test_double_zero: %f,8
 test_double_pi: %f,8
 test_double_neg: %f,8
-test_int64_min: %d,8
-test_int64_max: %d,8
-test_int64_1to0to1: %d,8
-test_uint64_min: %d,8
-test_uint64_max: %d,8
-test_uint64_1to0to1: %d,8
+test_int64_min: %ld,8
+test_int64_max: %ld,8
+test_int64_1to0to1: %ld,8
+test_uint64_min: %ld,8
+test_uint64_max: %ld,8
+test_uint64_1to0to1: %ld,8
 test_promotion: %d,4
