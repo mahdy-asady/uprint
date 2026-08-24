@@ -12,6 +12,9 @@ $(TARGET): main.c
 	@rm -f uprint.db
 	@$(CC) $(CFLAGS) $< -o $@
 
+run:
+	@bin/test_app
+
 clean:
 	rm -rf bin
 	rm -f uprint.db *.o

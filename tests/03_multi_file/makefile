@@ -12,6 +12,9 @@ $(TARGET): main.c emitter.c
 	@rm -f uprint.db
 	@$(CC) $(CFLAGS) main.c emitter.c third.c -o $(TARGET)
 
+run:
+	@bin/test_app
+
 clean:
 	rm -rf bin
 	rm -f uprint.db *.o

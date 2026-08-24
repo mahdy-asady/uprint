@@ -6,7 +6,6 @@ import subprocess
 from pathlib import Path
 import re
 
-APP_NAME = "bin/test_app"
 DB_NAME = "uprint.db"
 
 EXPECTED_DB_NAME = "expected.db"
@@ -183,13 +182,7 @@ def run_test(test_dir: Path) -> tuple[bool, str]:
     log(center())
     log(f"{WARNING}[Step 3: Execution]{RESET}")
 
-    exec_path = test_dir / APP_NAME
-    if not exec_path.exists():
-        print(f"{ERROR} FAILED{RESET}")
-        log("❌ Executable binary not found!")
-        return False, buffer.getvalue()
-
-    exec_res = subprocess.run([str(exec_path)], capture_output=True)
+    exec_res = subprocess.run(["make", "-sC", str(test_dir), "run"], capture_output=True)
 
     log(f"App Exit Code: {exec_res.returncode}")
 
