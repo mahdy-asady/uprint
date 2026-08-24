@@ -24,6 +24,17 @@ void register_plugin_info() {
     register_callback(PLUGIN_NAME, PLUGIN_INFO, NULL, &uprint_plugin_info);
 }
 
+bool plugin_version_check (struct plugin_gcc_version *host_version) {
+    struct { unsigned major, minor, build; } host, plugin;
+
+    sscanf(host_version->basever, "%u.%u.%u", &host.major, &host.minor, &host.build);
+    sscanf(gcc_version.basever, "%u.%u.%u", &plugin.major, &plugin.minor, &plugin.build);
+
+    if(host.major == plugin.major && host.minor == plugin.minor)
+        return true;
+    return false;
+}
+
 // Cleanup plugin resources when GCC finishes processing the compilation unit.
 void plugin_deinit(void *gcc_data, void *user_data) {
     db.reset();
@@ -35,8 +46,10 @@ void plugin_deinit(void *gcc_data, void *user_data) {
 // register plugin metadata, and install the lowering pass.
 int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version) {
     // Check the GCC version used to compile the plugin against the current GCC version. If they don't equal, the plugin aborts initialization
-    if (!plugin_default_version_check (version, &gcc_version))
+    if (!plugin_version_check(version)) {
+        std::cout << "Error: Incompatible gcc/plugin versions" << std::endl;
         return 1;
+    }
     DEBUG("%s plugin v%s loaded!", PLUGIN_NAME, PLUGIN_VERSION);
 
     db = std::make_unique<database>();
