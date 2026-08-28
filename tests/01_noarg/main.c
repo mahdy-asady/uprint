@@ -14,11 +14,11 @@ void test_empty_format_string() {
 }
 
 void test_literal() {
-    uprint("literal-only");
+    uprint("literal-only\n");
 }
 
 void test_escape_comma() {
-    uprint("Escaped, comma");
+    uprint("Escaped, comma\n");
 }
 
 int main()

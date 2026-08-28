@@ -17,27 +17,27 @@ void __uprint_emit(const void *data, uint16_t length) {
 
 void test_char_A() {
     char c = 'A';
-    uprint("test_char_A: %c", c);
+    uprint("test_char_A: %c\n", c);
 }
 
 void test_uint8_min() {
     uint8_t c = 0;
-    uprint("test_uint8_min: %c", c);
+    uprint("test_uint8_min: %c\n", c);
 }
 
 void test_uint8_max() {
     uint8_t c = 0xFF;
-    uprint("test_uint8_max: %c", c);
+    uprint("test_uint8_max: %c\n", c);
 }
 
 void test_int8_min() {
     uint8_t c = 0x80;
-    uprint("test_int8_min: %c", c);
+    uprint("test_int8_min: %c\n", c);
 }
 
 void test_int8_max() {
     uint8_t c = 0x7F;
-    uprint("test_int8_max: %c", c);
+    uprint("test_int8_max: %c\n", c);
 }
 
 /*******************************************************************************************
@@ -46,17 +46,17 @@ void test_int8_max() {
 
 void test_short_min() {
     short num = -32768;
-    uprint("test_short_min: %d", num);
+    uprint("test_short_min: %d\n", num);
 }
 
 void test_short_max() {
     short num = 0x7FFF;
-    uprint("test_short_max: %d", num);
+    uprint("test_short_max: %d\n", num);
 }
 
 void test_short_1234() {
     short num = 0x3039;
-    uprint("test_short_1234: %d", num);
+    uprint("test_short_1234: %d\n", num);
 }
 
 /*******************************************************************************************
@@ -65,32 +65,32 @@ void test_short_1234() {
 
 void test_int32_min() {
     int32_t num = 0x80000000;
-    uprint("test_int32_min: %d", num);
+    uprint("test_int32_min: %d\n", num);
 }
 
 void test_int32_max() {
     int32_t num = 0x7FFFFFFF;
-    uprint("test_int32_max: %d", num);
+    uprint("test_int32_max: %d\n", num);
 }
 
 void test_int32_1234567890() {
     int32_t num = 0x499602D2;
-    uprint("test_int32_1234567890: %d", num);
+    uprint("test_int32_1234567890: %d\n", num);
 }
 
 void test_uint32_min() {
     uint32_t num = 0;
-    uprint("test_uint32_min: %d", num);
+    uprint("test_uint32_min: %d\n", num);
 }
 
 void test_uint32_max() {
     uint32_t num = 0xFFFFFFFF;
-    uprint("test_uint32_max: %d", num);
+    uprint("test_uint32_max: %d\n", num);
 }
 
 void test_uint32_1234567890() {
     uint32_t num = 0x499602D2;
-    uprint("test_uint32_1234567890: %d", num);
+    uprint("test_uint32_1234567890: %d\n", num);
 }
 
 /*******************************************************************************************
@@ -99,17 +99,17 @@ void test_uint32_1234567890() {
 
 void test_float_zero() {
     float num = 0.0f;
-    uprint("test_float_zero: %f", num);
+    uprint("test_float_zero: %f\n", num);
 }
 
 void test_float_pi() {
     float num = 3.14159265f;
-    uprint("test_float_pi: %f", num);
+    uprint("test_float_pi: %f\n", num);
 }
 
 void test_float_neg() {
     float num = -2.5f;
-    uprint("test_float_neg: %f", num);
+    uprint("test_float_neg: %f\n", num);
 }
 
 /*******************************************************************************************
@@ -118,17 +118,17 @@ void test_float_neg() {
 
 void test_double_zero() {
     double num = 0.0;
-    uprint("test_double_zero: %f", num);
+    uprint("test_double_zero: %f\n", num);
 }
 
 void test_double_pi() {
     double num = 3.141592653589793;
-    uprint("test_double_pi: %f", num);
+    uprint("test_double_pi: %f\n", num);
 }
 
 void test_double_neg() {
     double num = -2.5;
-    uprint("test_double_neg: %f", num);
+    uprint("test_double_neg: %f\n", num);
 }
 
 /*******************************************************************************************
@@ -137,37 +137,37 @@ void test_double_neg() {
 
 void test_int64_min() {
     int64_t num = 0x8000000000000000;
-    uprint("test_int64_min: %ld", num);
+    uprint("test_int64_min: %ld\n", num);
 }
 
 void test_int64_max() {
     int64_t num = 0x7FFFFFFFFFFFFFFF;
-    uprint("test_int64_max: %ld", num);
+    uprint("test_int64_max: %ld\n", num);
 }
 
 void test_int64_1to0to1() {
     int64_t num = 0xAB54A98EEE391EEA;
-    uprint("test_int64_1to0to1: %ld", num);
+    uprint("test_int64_1to0to1: %ld\n", num);
 }
 
 void test_uint64_min() {
     uint64_t num = 0;
-    uprint("test_uint64_min: %ld", num);
+    uprint("test_uint64_min: %ld\n", num);
 }
 
 void test_uint64_max() {
     uint64_t num = 0xFFFFFFFFFFFFFFFF;
-    uprint("test_uint64_max: %ld", num);
+    uprint("test_uint64_max: %ld\n", num);
 }
 
 void test_uint64_1to0to1() {
     uint64_t num = 0xAB54A98EEE391EEA;
-    uprint("test_uint64_1to0to1: %ld", num);
+    uprint("test_uint64_1to0to1: %ld\n", num);
 }
 
 // C Promotion test
 void test_promotion() {
-    uprint("test_promotion: %d", 0);
+    uprint("test_promotion: %d\n", 0);
 }
 
 int main()

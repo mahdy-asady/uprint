@@ -2,7 +2,7 @@
 #include "third.h"
 
 void test_literal() {
-    uprint("literal-only");
+    uprint("literal-only\n");
 }
 
 int main()
