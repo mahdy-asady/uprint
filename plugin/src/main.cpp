@@ -1,4 +1,5 @@
 #include <gcc-plugin.h>
+#include <tree.h>
 #include <plugin-version.h>
 #include <iostream>
 #include <memory>
@@ -22,6 +23,14 @@ void register_plugin_info() {
     };
 
     register_callback(PLUGIN_NAME, PLUGIN_INFO, NULL, &uprint_plugin_info);
+}
+
+// Callback to register attributes with GCC
+static void register_uprint_attribute(void *event_data, void *data) {
+    static struct attribute_spec uprint_attr = { "uprint_loaded", 0, 0, false, false, false, false, nullptr, nullptr };
+    register_attribute(&uprint_attr);
+    (void) event_data;
+    (void) data;
 }
 
 bool plugin_version_check (struct plugin_gcc_version *host_version) {
@@ -58,6 +67,9 @@ int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version 
     register_callback(PLUGIN_NAME, PLUGIN_FINISH, plugin_deinit,NULL);
 
     register_plugin_info();
+
+    // Register custom attribute
+    register_callback(plugin_info->base_name, PLUGIN_ATTRIBUTES, register_uprint_attribute, nullptr);
 
     register_uprint_lower(db.get());
 

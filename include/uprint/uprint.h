@@ -7,6 +7,10 @@
 extern "C" {
 #endif
 
+#if defined(__has_attribute) && __has_attribute(__uprint_loaded__)
+// PLUGIN LOADED
+// Both uprint() & __uprint_emit() functions shall be declared
+
 /**
  * @brief High-level application logging entry point.
  *
@@ -47,6 +51,22 @@ void uprint(const char *format_string, ...);
  * @param length Total payload size of the binary log packet in bytes.
  */
 void __uprint_emit(const void *data, uint16_t length);
+
+#else // __has_attribute(__uprint_tokenized__)
+// PLUGIN NOT LOADED
+
+#ifdef NO_UPRINT
+// If user defined the preprocessor macro (as -DNO_UPRINT), we will totally ignore all uprint() calls
+#define uprint(...) ((void)0)
+
+#else
+// If user did not define the preprocessor macro, we will replace all uprint() calls with printf()
+#include <stdio.h>
+#define uprint(...) printf(__VA_ARGS__)
+
+#endif  // NO_UPRINT
+
+#endif // __has_attribute(__uprint_tokenized__)
 
 #ifdef __cplusplus
 }

@@ -2,15 +2,21 @@ PLUGIN_PATH ?= ../../plugin/bin/uprint.so
 INC_DIR     ?= ../../include
 
 CC       := gcc
-CFLAGS   := -O2 -I$(INC_DIR) -fplugin=$(PLUGIN_PATH) -Wall -Wextra -fanalyzer -Wpedantic
+CFLAGS   := -O2 -I$(INC_DIR) -Wall -Wextra -fanalyzer -Wpedantic
+PL_FLAGS := -fplugin=$(PLUGIN_PATH)
 TARGET   := bin/test_app
 
 all: $(TARGET)
 
-$(TARGET): main.c emitter.c
+$(TARGET): main.c emitter.c third.c
 	@mkdir -p bin
 	@rm -f uprint.db
-	@$(CC) $(CFLAGS) main.c emitter.c third.c -o $(TARGET)
+	@$(CC) $(CFLAGS) $(PL_FLAGS) main.c emitter.c third.c -o $@
+
+no_uprint: main.c
+	@mkdir -p bin
+	@rm -f uprint.db
+	@$(CC) $(CFLAGS) $< -o $(TARGET)
 
 run:
 	@bin/test_app
