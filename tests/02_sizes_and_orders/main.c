@@ -22,22 +22,22 @@ void test_char_A() {
 
 void test_uint8_min() {
     uint8_t c = 0;
-    uprint("test_uint8_min: %c\n", c);
+    uprint("test_uint8_min: %u\n", c);
 }
 
 void test_uint8_max() {
     uint8_t c = 0xFF;
-    uprint("test_uint8_max: %c\n", c);
+    uprint("test_uint8_max: %u\n", c);
 }
 
 void test_int8_min() {
-    uint8_t c = 0x80;
-    uprint("test_int8_min: %c\n", c);
+    int8_t c = -128;
+    uprint("test_int8_min: %d\n", c);
 }
 
 void test_int8_max() {
-    uint8_t c = 0x7F;
-    uprint("test_int8_max: %c\n", c);
+    int8_t c = 0x7F;
+    uprint("test_int8_max: %d\n", c);
 }
 
 /*******************************************************************************************
@@ -54,9 +54,9 @@ void test_short_max() {
     uprint("test_short_max: %d\n", num);
 }
 
-void test_short_1234() {
+void test_short_12345() {
     short num = 0x3039;
-    uprint("test_short_1234: %d\n", num);
+    uprint("test_short_12345: %d\n", num);
 }
 
 /*******************************************************************************************
@@ -80,12 +80,12 @@ void test_int32_1234567890() {
 
 void test_uint32_min() {
     uint32_t num = 0;
-    uprint("test_uint32_min: %d\n", num);
+    uprint("test_uint32_min: %u\n", num);
 }
 
 void test_uint32_max() {
     uint32_t num = 0xFFFFFFFF;
-    uprint("test_uint32_max: %d\n", num);
+    uprint("test_uint32_max: %u\n", num);
 }
 
 void test_uint32_1234567890() {
@@ -157,12 +157,12 @@ void test_uint64_min() {
 
 void test_uint64_max() {
     uint64_t num = 0xFFFFFFFFFFFFFFFF;
-    uprint("test_uint64_max: %ld\n", num);
+    uprint("test_uint64_max: %lu\n", num);
 }
 
 void test_uint64_1to0to1() {
     uint64_t num = 0xAB54A98EEE391EEA;
-    uprint("test_uint64_1to0to1: %ld\n", num);
+    uprint("test_uint64_1to0to1: %lu\n", num);
 }
 
 // C Promotion test
@@ -180,7 +180,7 @@ int main()
 
     test_short_min();
     test_short_max();
-    test_short_1234();
+    test_short_12345();
 
     test_int32_min();
     test_int32_max();
