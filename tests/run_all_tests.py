@@ -10,6 +10,7 @@ DB_NAME = "uprint.db"
 
 EXPECTED_DB_NAME = "expected.db"
 EXPECTED_OUTPUT_NAME = "expected.output"
+EXPECTED_DECODE_NAME = "expected.decode"
 
 
 # Color definitions
@@ -128,6 +129,42 @@ def verify_binary_stream(expected_file: Path, actual_bytes: bytes) -> tuple[bool
 
     return not failed, buffer.getvalue()
 
+def verify_text(expected_file: Path, actual_text: str) -> tuple[bool, str]:
+    buffer = io.StringIO()
+    def log(msg: str):
+        buffer.write(msg + "\n")
+
+    failed = False
+    test_name = expected_file.parent.name
+
+    # Read expected lines and strip trailing newlines
+    with open(expected_file, "r", encoding="utf-8") as f:
+        expected_lines = [
+            line.rstrip("\r\n") for line in f 
+            if line.strip() and not line.strip().startswith("#")
+        ]
+
+    # Split actual stdout lines (ignoring empty trailing lines)
+    actual_lines = [line.rstrip("\r\n") for line in actual_text.splitlines() if line.strip()]
+
+    # 1. Compare line by line
+    max_lines = max(len(expected_lines), len(actual_lines))
+    for idx in range(max_lines):
+        exp = expected_lines[idx] if idx < len(expected_lines) else None
+        act = actual_lines[idx] if idx < len(actual_lines) else None
+
+        print(f">>> {test_name} [Decode Line {idx+1}] ", end="", flush=True)
+
+        if exp != act:
+            log(f"❌ Mismatch in {expected_file.name} at line {idx+1}:")
+            log(f"   Expected: {repr(exp) if exp is not None else '<EOF>'}")
+            log(f"   Actual:   {repr(act) if act is not None else '<EOF>'}")
+            print(f"{ERROR}FAILED{RESET}")
+            failed = True
+        else:
+            print(f"{SUCCESS}PASSED{RESET}")
+
+    return not failed, buffer.getvalue()
 
 # Run a single test
 def run_test(test_dir: Path) -> tuple[bool, str]:
@@ -211,7 +248,39 @@ def run_test(test_dir: Path) -> tuple[bool, str]:
 
     log(f"✅ {GREEN_LIGHT}Output OK{RESET}")
 
-    # 5. Success
+    # 5. Decode test application output
+    print(f">>> {test_dir.name} - DECODE", end="", flush=True)
+    log(center())
+    log(f"{WARNING}[Step 5: Decode]{RESET}")
+    p_make = subprocess.Popen(["make", "-sC", str(test_dir), "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p_decoder = subprocess.Popen(["../decoder.py", db_file], stdin=p_make.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    p_make.stdout.close()
+
+    stdout_data, stderr_data = p_decoder.communicate()
+    p_make.wait()
+
+    if p_make.returncode != 0 or p_decoder.returncode != 0:
+        print(f"{ERROR} FAILED{RESET}")
+        log(f"❌ Decoding Failed:\n{stderr_data}")
+        return False, buffer.getvalue()
+
+    # 6. Verify Decoder Output
+    log(center())
+    log(f"{WARNING}[Step 6: Verify Decoder Output]{RESET}")
+
+    expected_decode = test_dir / EXPECTED_DECODE_NAME
+
+    if not expected_decode.exists():
+        print(f"{ERROR} FAILED{RESET}")
+        log(f"❌ Missing expected decode file: {expected_decode}")
+        return False, buffer.getvalue()
+
+    verify_ret, verify_log = verify_text(expected_decode, stdout_data)
+    if not verify_ret:
+        log(f"❌ Expected decode output mismatch:\n{verify_log}")
+        return False, buffer.getvalue()
+
+    # 7. Success
     return True, buffer.getvalue()
 
 # Loop through all test directories and run tests
