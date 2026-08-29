@@ -13,10 +13,10 @@ $(TARGET): main.c emitter.c third.c
 	@rm -f uprint.db
 	@$(CC) $(CFLAGS) $(PL_FLAGS) main.c emitter.c third.c -o $@
 
-no_uprint: main.c
+no_uprint: main.c emitter.c third.c
 	@mkdir -p bin
 	@rm -f uprint.db
-	@$(CC) $(CFLAGS) $< -o $(TARGET)
+	@$(CC) $(CFLAGS) main.c emitter.c third.c -o $(TARGET)
 
 run:
 	@bin/test_app
