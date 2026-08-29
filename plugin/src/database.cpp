@@ -72,7 +72,7 @@ uint32_t database::get_new_id(FILE *db_file) {
 }
 
 void database::write_escaped_fmt_str(FILE *db_file, const std::string &str) {
-    const bool needs_quotes = (str.find_first_of(",\"") != std::string_view::npos);
+    const bool needs_quotes = (str.find_first_of(",\"") != std::string_view::npos) || str.length() == 0;
     if(needs_quotes)
         fputc('"', db_file);
     for (char c : str) {
