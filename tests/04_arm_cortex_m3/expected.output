@@ -1,0 +1,80 @@
+# test_char_A: %c,1
+01 00 00 00  41
+
+# test_uint8_min: %c,1
+02 00 00 00  00
+
+# test_uint8_max: %c,1
+03 00 00 00  FF
+
+# test_int8_min: %c,1
+04 00 00 00  80
+
+# test_int8_max: %c,1
+05 00 00 00  7F
+
+# test_short_min: %d,2
+06 00 00 00  00 80
+
+# test_short_max: %d,2
+07 00 00 00  FF 7F
+
+# test_short_1234: %d,2
+08 00 00 00  39 30
+
+# test_int32_min: %d,4
+09 00 00 00  00 00 00 80
+
+# test_int32_max: %d,4
+0A 00 00 00  FF FF FF 7F
+
+# test_int32_1234567890: %d,4
+0B 00 00 00  D2 02 96 49
+
+# test_uint32_min: %d,4
+0C 00 00 00  00 00 00 00
+
+# test_uint32_max: %d,4
+0D 00 00 00  FF FF FF FF
+
+# test_uint32_1234567890: %d,4
+0E 00 00 00  D2 02 96 49
+
+#test_float_zero: %f,4
+0F 00 00 00  00 00 00 00
+
+#test_float_pi: %f,4
+10 00 00 00  DB 0F 49 40
+
+#test_float_neg: %f,4
+11 00 00 00  00 00 20 C0
+
+#test_double_zero: %f,8
+12 00 00 00  00 00 00 00 00 00 00 00
+
+#test_double_pi: %f,8
+13 00 00 00  18 2D 44 54 FB 21 09 40
+
+#test_double_neg: %f,8
+14 00 00 00  00 00 00 00 00 00 04 C0
+
+# test_int64_min: %d,8
+15 00 00 00  00 00 00 00 00 00 00 80
+
+# test_int64_max: %d,8
+16 00 00 00  FF FF FF FF FF FF FF 7F
+
+# test_int64_1to0to1: %d,8
+17 00 00 00  EA 1E 39 EE 8E A9 54 AB
+
+# test_uint64_min: %d,8
+18 00 00 00  00 00 00 00 00 00 00 00
+
+# test_uint64_max: %d,8
+19 00 00 00  FF FF FF FF FF FF FF FF
+
+# test_uint64_1to0to1: %d,8
+1A 00 00 00  EA 1E 39 EE 8E A9 54 AB
+
+# test_promotion: %d,4
+1B 00 00 00  00 00 00 00
